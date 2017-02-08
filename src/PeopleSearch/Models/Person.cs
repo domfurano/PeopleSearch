@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
 namespace PeopleSearch.Models
@@ -6,6 +7,10 @@ namespace PeopleSearch.Models
     public class PersonContext: DbContext
     {
         public DbSet<Person> People { get; set; }
+
+        public PersonContext() { }
+
+        public PersonContext(DbContextOptions options): base(options) { }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
