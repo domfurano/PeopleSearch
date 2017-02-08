@@ -12,7 +12,7 @@ namespace PeopleSearch.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite("Filename=../../../Database/PeopleSearch.db");
+            optionsBuilder.UseSqlite("Filename=PeopleSearch.db");
         }
     }
 

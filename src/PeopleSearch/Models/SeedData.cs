@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace PeopleSearch.Models
 {
@@ -8,6 +9,8 @@ namespace PeopleSearch.Models
         {
             using (var personContext = new PersonContext())
             {
+                personContext.Database.Migrate();
+
                 if (personContext.People.Any())
                 {
                     return;
