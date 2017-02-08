@@ -34,7 +34,7 @@ namespace PeopleSearch.Controllers
             if (!string.IsNullOrWhiteSpace(searchRequest.searchString))
             {
                 IQueryable<Person> peopleQuery = from s in _context.People
-                                                 where s.Name.Contains(searchRequest.searchString)
+                                                 where s.Name.IndexOf(searchRequest.searchString, StringComparison.OrdinalIgnoreCase) >= 0
                                                  select s;
                 people = peopleQuery.ToList();
             }
@@ -45,23 +45,6 @@ namespace PeopleSearch.Controllers
             }
 
             return Json(people);
-        }
-
-        // GET: People/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var person = await _context.People.SingleOrDefaultAsync(m => m.ID == id);
-            if (person == null)
-            {
-                return NotFound();
-            }
-
-            return View(person);
         }
 
         // GET: People/Create
@@ -75,7 +58,7 @@ namespace PeopleSearch.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Age,Interests,Name,Picture")] Person person)
+        public async Task<IActionResult> Create([Bind("ID,Name,Address,Age,Interests,Picture")] Person person)
         {
             if (ModelState.IsValid)
             {
@@ -107,7 +90,7 @@ namespace PeopleSearch.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Age,Interests,Name,Picture")] Person person)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Address,Age,Interests,Picture")] Person person)
         {
             if (id != person.ID)
             {
