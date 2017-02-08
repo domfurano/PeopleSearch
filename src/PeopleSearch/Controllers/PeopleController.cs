@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PeopleSearch.Data;
 using PeopleSearch.Models;
+using PeopleSearch.ViewModels;
 
 namespace PeopleSearch.Controllers
 {
@@ -16,13 +18,32 @@ namespace PeopleSearch.Controllers
 
         public PeopleController(ApplicationDbContext context)
         {
-            _context = context;    
+            _context = context;
         }
 
         // GET: People
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.Person.ToListAsync());
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Search([Bind("searchString,slow"), FromBody] PersonSearchRequest searchRequest)
+        {
+            IQueryable<Person> movies = from s in _context.Person
+                                        select s;
+
+            if (!string.IsNullOrWhiteSpace(searchRequest.searchString))
+            {
+                movies = movies.Where(s => s.Name.Contains(searchRequest.searchString));
+            }
+
+            if (searchRequest.slow)
+            {
+                Thread.Sleep(3000);
+            }
+
+            return Json(movies.ToList());
         }
 
         // GET: People/Details/5

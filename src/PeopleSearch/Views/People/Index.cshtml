@@ -1,53 +1,101 @@
-@model IEnumerable<PeopleSearch.Models.Person>
-
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "People Search";
 }
 
-<h2>Index</h2>
+@section scripts {
+    <script type="text/javascript">
+        var loading = false;
+
+        function displayPersonSearchResults(searchResults) {
+            var peopleHtml = '';
+
+            for (var person in searchResults) {
+                var p = searchResults[person];
+                var name = p['name'];
+                var address = p['address'];
+                var age = p['age'];
+                var interests = p['interests'].split(',');
+                var picture = p['picture'];
+                console.log(name);
+
+                peopleHtml +=
+                    '<div class="well" style="margin: 8px;">' +
+                    '<div class="row">' +
+                    '<div class="col-sm-3">' +
+                    '<img style="width: 100%;" src="' + picture + '"></img>' +
+                    '</div>' +
+                    '<div class="col-sm-9">' +
+                    '<h4>' + name + '</h4>' +
+                    '<p>' + address + '</p>' +
+                    '<p><strong>Age: </strong>' + age + '</p>' +
+                    '<p><strong>Interests: </strong>' + interests.join(', ') + '</p>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+            }
+
+            $('#searchResults').html(peopleHtml);
+        }
+
+        $(function () {
+            $('body').on('input', '#inputSearch', function (e) {
+                // Remove previous search results.
+                $('#searchResults').html('');
+
+                $.ajax({
+                    url: '@Url.Action("Search")',
+                    type: 'POST',
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({
+                        'searchString': $('#inputSearch').val(),
+                        'slow': $('#cbSlow').is(':checked'),
+                    }),
+                    success: function (response) {
+                        loading = false;
+                        $('#imgSearching').css('display', 'none');
+                        displayPersonSearchResults(response);
+                    },
+                    error: function (error) {
+                        loading = false;
+                        console.log(error);
+                    }
+                });
+                
+                loading = true;
+
+                setTimeout(function () {
+                    if (loading) {
+                        $('#imgSearching').css('display', 'block');
+                    }
+                 }, 500);
+            });
+        });
+    </script>
+}
+
+<h2>People Search</h2>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Create New Person</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Age)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Interests)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Picture)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Age)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Interests)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Picture)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+
+
+<div class="form-inline">
+    <div class="form-group">
+        Search: <input id="inputSearch" type="text" name="SearchString" />
+    </div>
+    <div class="form-group">
+        <div class="checkbox">
+            <label><input id="cbSlow" type="checkbox">Slow</label>
+        </div>
+        @*<button id="btnSlow" type="button" class="btn btn-warning" data-toggle="button" aria-pressed="false" autocomplete="off">
+                Slow
+            </button>*@
+    </div>
+</div>
+
+
+<img id="imgSearching" style="display: none; margin: auto; opacity: 0.5;" src="Images/magnify.gif" />
+
+<div id="searchResults" />
+
