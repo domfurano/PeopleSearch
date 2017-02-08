@@ -10,12 +10,17 @@ namespace PeopleSearch.Models
 
         public PersonContext() { }
 
-        public PersonContext(DbContextOptions options): base(options) { }
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlite("Filename=./PeopleSearch.db");
         }
+    }
+
+    public class TestPersonContext : DbContext
+    {
+        public DbSet<Person> People { get; set; }
+
+        public TestPersonContext(DbContextOptions options) : base(options) { }
     }
 
     public class Person
