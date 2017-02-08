@@ -12,7 +12,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
-using PeopleSearch.Data;
 using PeopleSearch.Models;
 using PeopleSearch.Services;
 
@@ -48,11 +47,11 @@ namespace PeopleSearch
             // Add framework services.
             services.AddApplicationInsightsTelemetry(Configuration);
 
-            services.AddDbContext<ApplicationDbContext>(options =>
+            services.AddDbContext<PersonContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddEntityFrameworkStores<PersonContext>()
                 .AddDefaultTokenProviders();
 
             services.AddMvc();
@@ -103,7 +102,7 @@ namespace PeopleSearch
                     template: "{controller=People}/{action=Index}/{id?}");
             });
 
-            SeedData.Initialize(app.ApplicationServices);
+            SeedData.Initialize();
         }
     }
 }

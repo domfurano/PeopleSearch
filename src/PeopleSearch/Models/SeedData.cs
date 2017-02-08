@@ -2,23 +2,21 @@
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using PeopleSearch.Data;
 
 namespace PeopleSearch.Models
 {
     public class SeedData
     {
-        public static void Initialize(IServiceProvider serviceProvider)
+        public static void Initialize()
         {
-            using (var context = new ApplicationDbContext(
-                serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>()))
+            using (var personContext = new PersonContext())
             {
-                if (context.Person.Any())
+                if (personContext.People.Any())
                 {
                     return;
                 }
 
-                context.Person.AddRange(
+                personContext.AddRange(
                     new Person
                     {
                         Name = "Bill Gates",
@@ -74,7 +72,7 @@ namespace PeopleSearch.Models
                     }
                 );
 
-                context.SaveChanges();
+                personContext.SaveChanges();
             }
         }
     }

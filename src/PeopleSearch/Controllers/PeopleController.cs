@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using PeopleSearch.Data;
 using PeopleSearch.Models;
 using PeopleSearch.ViewModels;
 
@@ -14,9 +13,9 @@ namespace PeopleSearch.Controllers
 {
     public class PeopleController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly PersonContext _context;
 
-        public PeopleController(ApplicationDbContext context)
+        public PeopleController(PersonContext context)
         {
             _context = context;
         }
@@ -30,12 +29,14 @@ namespace PeopleSearch.Controllers
         [HttpPost]
         public IActionResult Search([Bind("searchString,slow"), FromBody] PersonSearchRequest searchRequest)
         {
-            IQueryable<Person> movies = from s in _context.Person
-                                        select s;
+            List<Person> people = new List<Person>();
 
             if (!string.IsNullOrWhiteSpace(searchRequest.searchString))
             {
-                movies = movies.Where(s => s.Name.Contains(searchRequest.searchString));
+                IQueryable<Person> peopleQuery = from s in _context.People
+                                                 where s.Name.Contains(searchRequest.searchString)
+                                                 select s;
+                people = peopleQuery.ToList();
             }
 
             if (searchRequest.slow)
@@ -43,7 +44,7 @@ namespace PeopleSearch.Controllers
                 Thread.Sleep(3000);
             }
 
-            return Json(movies.ToList());
+            return Json(people);
         }
 
         // GET: People/Details/5
@@ -54,7 +55,7 @@ namespace PeopleSearch.Controllers
                 return NotFound();
             }
 
-            var person = await _context.Person.SingleOrDefaultAsync(m => m.ID == id);
+            var person = await _context.People.SingleOrDefaultAsync(m => m.ID == id);
             if (person == null)
             {
                 return NotFound();
@@ -93,7 +94,7 @@ namespace PeopleSearch.Controllers
                 return NotFound();
             }
 
-            var person = await _context.Person.SingleOrDefaultAsync(m => m.ID == id);
+            var person = await _context.People.SingleOrDefaultAsync(m => m.ID == id);
             if (person == null)
             {
                 return NotFound();
@@ -144,7 +145,7 @@ namespace PeopleSearch.Controllers
                 return NotFound();
             }
 
-            var person = await _context.Person.SingleOrDefaultAsync(m => m.ID == id);
+            var person = await _context.People.SingleOrDefaultAsync(m => m.ID == id);
             if (person == null)
             {
                 return NotFound();
@@ -158,15 +159,15 @@ namespace PeopleSearch.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var person = await _context.Person.SingleOrDefaultAsync(m => m.ID == id);
-            _context.Person.Remove(person);
+            var person = await _context.People.SingleOrDefaultAsync(m => m.ID == id);
+            _context.People.Remove(person);
             await _context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
 
         private bool PersonExists(int id)
         {
-            return _context.Person.Any(e => e.ID == id);
+            return _context.People.Any(e => e.ID == id);
         }
     }
 }
